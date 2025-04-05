@@ -18,11 +18,18 @@ If you don't have your API key, get one from [orshot.com](https://orshot.com).
 os = orshot.Orshot('YOUR_ORSHOT_API_KEY')
 ```
 
-### Generate image
+### Render from template
 
 ```python
-response = os.render_from_template('open-graph-image-1', {'title': 'From python sdk new'}, 'base64')
-print(response['data']['base64'])
+response = os.render_from_template({'template_id': 'open-graph-image-1', 'modifications': {'title': 'From python sdk new'}, 'response_type': 'base64', 'response_format': 'png'})
+print(response['data'])
+```
+
+### Generate signed URL
+
+```python
+response = os.generate_signed_url({'template_id': 'open-graph-image-1', 'modifications': {'title': 'From python sdk new'}, 'render_type': 'images', 'response_format': 'png', 'expires_at': 1744276943})
+print(response['data'])
 ```
 
 ## Example
@@ -85,7 +92,7 @@ with Image.open(BytesIO(response.content)) as im:
 
 This example writes the binary image to the file `og.png`
 
-### `Base64` response format
+### `URL` response format
 
 ```python
 import orshot
@@ -117,9 +124,40 @@ URL output
 }
 ```
 
-## generate_image_from_template
+### Signed URL
 
-Use this function to generate an image. It takes in a dictionary with 4 keys
+```python
+import orshot
+
+os = orshot.Orshot('os-he2jdus1cbz1dpt4mktgjyvx')
+modifications = {
+    'title': 'From Orshot Python SDK',
+    'description': 'Create Visuals and Automate Image Generation'
+}
+
+response = os.generate_signed_url({ 
+    'template_id': 'open-graph-image-1',
+    'modifications': modifications,
+    'render_type': 'images',
+    'response_format': 'png',
+    'expires_at': 1744276943
+})
+print(response)
+```
+
+Output
+
+```
+{
+  "data": {
+    "url": "https://api.orshot.com/v1/generate/images?expiresAt=1744276943&id=28&templateId=open-graph-image-1&title=From%20python%20sdk%20new&signature=fa4ea0aa4cf05bd9b836be031dccfc26abf41dcc623561ac262c75b658f725f1"
+  }
+}
+```
+
+## render_from_template
+
+Use this function to generate an image.
 
 | argument | required | description |
 |----------|----------|-------------|
@@ -129,6 +167,18 @@ Use this function to generate an image. It takes in a dictionary with 4 keys
 | `response_format` | No | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`) |
 
 For available templates and their modifications refer [Orshot Templates Page](https://orshot.com/templates)
+
+## generate_signed_url
+
+Use this function to get a signed URL.
+
+| argument | required | description |
+|----------|----------|-------------|
+| `template_id` | Yes | ID of the template (`open-graph-image-1`, `tweet-image-1`, `beautify-screenshot-1`) |
+| `modifications` | Yes | Modifications for the selected template. |
+| `expires_at` | Yes | Expires at time in UNIX timestamp (Integer) |
+| `render_type` | No | `images`, `pdfs` (Defaults to `images`). |
+| `response_format` | No | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`) |
 
 ## Local development and testing
 

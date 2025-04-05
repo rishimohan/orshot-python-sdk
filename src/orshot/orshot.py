@@ -3,10 +3,11 @@ from orshot.constants import (
     ORSHOT_SOURCE,
     ORSHOT_API_VERSION,
     ORSHOT_API_BASE_URL,
+    DEFAULT_RENDER_TYPE,
     DEFAULT_RESPONSE_TYPE,
     DEFAULT_RESPONSE_FORMAT
 )
-from orshot.types import RenderOptions
+from orshot.types import RenderOptions, SignedUrlOptions
 from orshot.exceptions import APIException, BadRequestException
 
 class Orshot:
@@ -52,3 +53,22 @@ class Orshot:
             raise BadRequestException(error_response)
         else:
             raise APIException(f"An error occurred while generating an image. Status code: {response.status_code}. Error: {response.json().get('error')}")
+
+    def generate_signed_url(self, signed_url_options: SignedUrlOptions):
+        endpoint_url = f"{self._get_base_url()}/signed-url/create"
+
+        data = {
+            'source': ORSHOT_SOURCE,
+            'templateId': signed_url_options.get('template_id'),
+            'modifications': signed_url_options.get('modifications'),
+            'responseFormat': signed_url_options.get('response_format', DEFAULT_RESPONSE_FORMAT),
+            'renderType': signed_url_options.get('render_type', DEFAULT_RENDER_TYPE),
+            'expiresAt': signed_url_options.get('expires_at')
+        }
+
+        response = requests.post(endpoint_url, headers=self._get_headers(), json=data)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise APIException(f"An error occurred while generating a signed URL. Status code: {response.status_code}. Error: {response.json()}")
